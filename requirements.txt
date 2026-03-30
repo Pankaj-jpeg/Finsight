@@ -1,0 +1,11 @@
+langchain
+langchain-groq
+langchain-chroma
+langchain-huggingface
+langchain-community
+langchain-text-splitters
+langchain-core
+python-dotenv
+streamlit
+pypdf
+duckduckgo-search
