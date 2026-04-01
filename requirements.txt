@@ -1,11 +1,28 @@
+# Web & UI
+streamlit
+python-dotenv
+requests
+
+# Core LangChain Components
 langchain
-langchain-groq
-langchain-chroma
-langchain-huggingface
+langchain-core
 langchain-community
 langchain-text-splitters
-langchain-core
-python-dotenv
-streamlit
-pypdf
+
+# AI Models & Embeddings
+langchain-ollama
+langchain-huggingface
+sentence-transformers
+
+# Vector Database & Retrieval
+langchain-chroma
+chromadb
+rank_bm25
+
+# PDF Processing (Unstructured)
+unstructured[pdf]
+pdf2image
+pdfminer.six
+
+# Web Search Tool
 duckduckgo-search
