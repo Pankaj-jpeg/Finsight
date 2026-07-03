@@ -1,62 +1,63 @@
-# ⚡ FInsight: Agentic RAG Quantitative Terminal
+# Finsight
 
-FInsight is an edge-native, locally hosted financial AI agent. It seamlessly merges historical corporate data (extracted from uploaded SEC filings) with live market metrics and breaking news, operating entirely on local LLMs to guarantee absolute data privacy.
+Finsight is an agentic RAG terminal for financial reports. Upload one or more 10-K/10-Q PDFs and ask questions — the agent reads the filings, cross-checks live stock data and news, and answers with citations back to the source report.
 
-## 🌟 Key Engineering Features
+It's built to avoid the two classic RAG failure modes: mixing up numbers between different companies' filings, and hallucinating figures that aren't actually in the document.
 
-Unlike standard "ChatGPT wrappers," FInsight utilizes an advanced, multi-agent architecture designed for strict financial accuracy:
+## How it works
 
-* **100% Local & Private AI:** Powered by Qwen 2.5 (via Ollama), ensuring sensitive financial documents never leave your machine.
-* **Dynamic Document Routing:** Solves the classic RAG "cross-pollination" bug by dynamically spinning up mathematically isolated vector databases for every uploaded PDF. The AI Agent routes its queries to the exact document needed, eliminating data bleeding between companies.
-* **Hybrid Vector Search:** Combines **ChromaDB** (semantic similarity) and **BM25** (exact keyword matching via EnsembleRetriever) to flawlessly extract dense, highly-specific financial tables (e.g., "Consolidated Statements of Operations") without hallucination.
-* **Live Market Synthesis:** Cross-references historical 10-K data with real-time stock metrics (Financial Modeling Prep API) and breaking market news (DuckDuckGo Search) to provide holistic investment verdicts.
-* **Interactive UI:** Built with Streamlit, featuring a dual-tab layout for an AI Command Center and an interactive Plotly Candlestick Market Dashboard.
+- **Ingestion** — each uploaded PDF is parsed with `UnstructuredPDFLoader`, chunked, and embedded with `all-MiniLM-L6-v2`.
+- **Isolated retrieval** — every document gets its own Chroma collection and its own retriever tool, so the agent can't accidentally blend Company A's numbers into an answer about Company B.
+- **Hybrid search** — each retriever combines BM25 (keyword) and Chroma (semantic) search via `EnsembleRetriever`, which matters a lot for financial tables where exact terms like "Profit After Tax" need to match precisely.
+- **Agent loop** — a LangChain tool-calling agent decides when to pull from a report, search the web for breaking news, look up a ticker, or fetch live quote data, then synthesizes an answer.
+- **LLM** — runs on Groq (`llama-3.3-70b-versatile`) for fast inference.
 
-## 🏗️ System Architecture
+## Project layout
 
-1.  **Ingestion:** PDFs are parsed using `UnstructuredPDFLoader`.
-2.  **Processing:** Text is chunked and embedded using HuggingFace `all-MiniLM-L6-v2`.
-3.  **Storage:** Dedicated Chroma collections are generated per document.
-4.  **Retrieval:** Hybrid Search (50% Semantic / 50% Keyword) surfaces relevant chunks.
-5.  **Execution:** LangChain's `AgentExecutor` manages tool-calling (Retrievers, Web Search, FMP API) and synthesizes the final output.
+```
+app.py         # Streamlit UI, wires everything together
+config.py      # env vars, LLM setup, theme/CSS, system prompt
+tools.py       # ticker lookup, live stock metrics, market news search
+ingestion.py   # PDF parsing + hybrid retriever construction
+```
 
-## 🚀 Getting Started
+## Setup
 
-### Prerequisites
-* Python 3.10+
-* [Ollama](https://ollama.com/) installed on your machine.
-* A free API key from [Financial Modeling Prep (FMP)](https://financialmodelingprep.com/).
+**Requirements:** Python 3.10+, a free [Groq API key](https://console.groq.com/keys), and a free [Financial Modeling Prep](https://site.financialmodelingprep.com/developer/docs) key.
 
-### Installation
+```bash
+git clone https://github.com/Pankaj-jpeg/Finsight.git
+cd Finsight
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-1. **Clone the repository:**
-   `git clone https://github.com/yourusername/FInsight.git`
-   `cd FInsight`
+Copy `.env.example` to `.env` and fill in your keys:
 
-2. **Create and activate a virtual environment:**
-   Windows: `python -m venv venv` and `.\venv\Scripts\activate`
-   Mac/Linux: `python3 -m venv venv` and `source venv/bin/activate`
+```
+GROQ_API_KEY=your_key_here
+FMP_API_KEY=your_key_here
+```
 
-3. **Install dependencies:**
-   `pip install -r requirements.txt`
+Run it:
 
-4. **Environment Variables:**
-   Create a `.env` file in the root directory and add your FMP API key:
-   `FMP_API_KEY=your_api_key_here`
+```bash
+streamlit run app.py
+```
 
-5. **Pull the Local LLM:**
-   Ensure Ollama is running, then pull the required model:
-   `ollama pull qwen2.5:7b`
+Open `http://localhost:8501`, upload a PDF report, and start asking questions.
 
-## 💻 Usage
+## Deploying
 
-Run the Streamlit application:
-`streamlit run app.py`
+Runs cleanly on [Streamlit Community Cloud](https://share.streamlit.io) — no GPU or local model needed now that inference is via Groq.
 
-1. Open your browser to `http://localhost:8501`.
-2. Upload one or more financial PDFs (e.g., 10-K, 10-Q reports) in the sidebar.
-3. Use the **Agent Chat** tab to ask comparative quantitative questions.
-4. Use the **Market Dashboard** tab to view live, interactive price action.
+1. Push this repo to GitHub (already done).
+2. On Streamlit Cloud: New app → point it at this repo → main file `app.py`.
+3. Under Advanced settings → Secrets, add `GROQ_API_KEY` and `FMP_API_KEY`.
+4. Deploy. `packages.txt` handles the system-level PDF dependencies (`poppler-utils`, `tesseract-ocr`, `libmagic1`) automatically.
 
-## ⚠️ Disclaimer
-This project is for educational and portfolio purposes only. AI-generated financial analysis can contain errors. Always conduct your own due diligence before making investment decisions.
+## Notes / limitations
+
+- Financial data accuracy depends entirely on what's in the uploaded PDF and what the retriever surfaces — always verify anything used for an actual investment decision.
+- `sentence-transformers` + `chromadb` are the heaviest dependencies; on memory-constrained hosting tiers, PDF ingestion is the most likely thing to fail first.
+- This is a portfolio/educational project, not financial advice.
