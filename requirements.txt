@@ -6,11 +6,12 @@ requests
 # Core LangChain Components
 langchain
 langchain-core
+langchain-classic
 langchain-community
 langchain-text-splitters
 
 # AI Models & Embeddings
-langchain-ollama
+langchain-groq
 langchain-huggingface
 sentence-transformers
 
