@@ -50,7 +50,7 @@ def get_llm():
     if not GROQ_API_KEY:
         st.error("GROQ_API_KEY is not set. Add it to your .env file (local) or Secrets (Streamlit Cloud).")
         st.stop()
-    return ChatGroq(model="llama-3.3-70b-versatile", temperature=0, groq_api_key=GROQ_API_KEY)
+    return ChatGroq(model="openai/gpt-oss-120b", temperature=0, groq_api_key=GROQ_API_KEY)
 
 
 def build_prompt():
@@ -70,7 +70,7 @@ def render_sidebar():
             **Finsight** is an edge-native, Agentic RAG quantitative terminal designed to autonomously analyze complex SEC filings and live market conditions.
 
             **System Architecture:**
-            * 🧠 **AI Engine:** Powered by Llama 3.3 70B via Groq's LPU inference for near-instant responses.
+            * 🧠 **AI Engine:** Powered by GPT-OSS 120B via Groq's LPU inference for near-instant responses.
             * 🔍 **Hybrid Vector Search:** Combines **ChromaDB** (semantic meaning) and **BM25** (exact keyword matching) to flawlessly extract dense financial tables without hallucinations.
             * 🔀 **Isolated Routing:** Dynamically spins up dedicated, siloed vector databases for every uploaded PDF to completely eliminate data cross-pollination.
             * 📈 **Live Synthesis:** Cross-references historical 10-K data with real-time stock metrics (Financial Modeling Prep) and breaking market news (DuckDuckGo).
