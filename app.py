@@ -39,12 +39,26 @@ if uploaded_files:
 
         with st.chat_message("assistant"):
             with st.spinner("Analyzing..."):
-                response = agent_executor.invoke(
-                    {"input": user_input, "chat_history": st.session_state.chat_history}
-                )
-                st.markdown(response["output"])
+                try:
+                    response = agent_executor.invoke(
+                        {"input": user_input, "chat_history": st.session_state.chat_history}
+                    )
+                    output = response["output"]
+                    st.markdown(output)
+                except Exception as e:
+                    msg = str(e)
+                    if "rate_limit" in msg.lower() or "429" in msg:
+                        output = None
+                        st.error(
+                            "Hit Groq's rate limit for this model. Wait a bit and try again, "
+                            "or switch to a lighter model / upgrade to Groq's Developer tier for higher limits."
+                        )
+                    else:
+                        output = None
+                        st.error(f"Something went wrong: {msg}")
 
-        st.session_state.chat_history.append(HumanMessage(content=user_input))
-        st.session_state.chat_history.append(AIMessage(content=response["output"]))
+        if output is not None:
+            st.session_state.chat_history.append(HumanMessage(content=user_input))
+            st.session_state.chat_history.append(AIMessage(content=output))
 elif user_input:
     st.info("Upload at least one financial report (PDF) before asking a question.")
