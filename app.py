@@ -6,7 +6,7 @@ from config import get_llm, build_prompt, render_sidebar
 from ingestion import create_retrievers
 from tools import ticker_search, get_stock_metrics, get_market_searcher
 
-st.set_page_config(page_title="Finsight", page_icon="📊")
+st.set_page_config(page_title="Finsight")
 render_sidebar()
 
 st.title("Finsight")
