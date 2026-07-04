@@ -11,7 +11,7 @@ langchain-community
 langchain-text-splitters
 
 # AI Models & Embeddings
-langchain-groq
+langchain-google-genai
 langchain-huggingface
 sentence-transformers
 
