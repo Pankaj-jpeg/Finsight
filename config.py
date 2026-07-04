@@ -1,12 +1,12 @@
 import os
 import streamlit as st
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 load_dotenv()
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 FMP_API_KEY = os.getenv("FMP_API_KEY")
 
 BACKGROUND_IMAGE_URL = (
@@ -47,13 +47,14 @@ CRITICAL RULES:
 
 
 def get_llm():
-    if not GOOGLE_API_KEY:
-        st.error("GOOGLE_API_KEY is not set. Add it to your .env file (local) or Secrets (Streamlit Cloud).")
+    if not GROQ_API_KEY:
+        st.error("GROQ_API_KEY is not set. Add it to your .env file (local) or Secrets (Streamlit Cloud).")
         st.stop()
-    return ChatGoogleGenerativeAI(
-        model="gemma-4-31b-it",
+    return ChatGroq(
+        model="openai/gpt-oss-120b",
         temperature=0,
-        google_api_key=GOOGLE_API_KEY,
+        groq_api_key=GROQ_API_KEY,
+        reasoning_effort="low",
     )
 
 
@@ -74,7 +75,7 @@ def render_sidebar():
             **Finsight** is an edge-native, Agentic RAG quantitative terminal designed to autonomously analyze complex SEC filings and live market conditions.
 
             **System Architecture:**
-            * 🧠 **AI Engine:** Powered by Gemma 4 31B via Google AI Studio.
+            * 🧠 **AI Engine:** Powered by GPT-OSS 120B via Groq's LPU inference for near-instant responses.
             * 🔍 **Hybrid Vector Search:** Combines **ChromaDB** (semantic meaning) and **BM25** (exact keyword matching) to flawlessly extract dense financial tables without hallucinations.
             * 🔀 **Isolated Routing:** Filters a shared vector store by company metadata for every uploaded PDF, keeping each report's data cleanly separated without duplicating infrastructure.
             * 📈 **Live Synthesis:** Cross-references historical 10-K data with real-time stock metrics (Financial Modeling Prep) and breaking market news (DuckDuckGo).
