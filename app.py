@@ -31,7 +31,9 @@ if uploaded_files:
     tools = report_tools + [get_market_searcher(), ticker_search, get_stock_metrics]
 
     agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+    agent_executor = AgentExecutor(
+        agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, max_iterations=6
+    )
 
     if user_input:
         with st.chat_message("user"):
@@ -47,11 +49,11 @@ if uploaded_files:
                     st.markdown(output)
                 except Exception as e:
                     msg = str(e)
-                    if "rate_limit" in msg.lower() or "429" in msg:
+                    if "rate_limit" in msg.lower() or "resource_exhausted" in msg.lower() or "quota" in msg.lower() or "429" in msg:
                         output = None
                         st.error(
-                            "Hit Groq's rate limit for this model. Wait a bit and try again, "
-                            "or switch to a lighter model / upgrade to Groq's Developer tier for higher limits."
+                            "Hit the API rate limit for this model. Wait a bit and try again, "
+                            "or check your Google AI Studio quota."
                         )
                     else:
                         output = None
