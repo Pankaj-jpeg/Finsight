@@ -46,14 +46,21 @@ if uploaded_files:
                         {"input": user_input, "chat_history": st.session_state.chat_history}
                     )
                     output = response["output"]
+                    if not isinstance(output, str):
+                        # Defensive: some providers can return content as a list of blocks
+                        # instead of a plain string; flatten it rather than crash or show raw repr.
+                        output = "\n\n".join(
+                            block.get("text") or block.get("thinking") or str(block)
+                            for block in output
+                        ) if isinstance(output, list) else str(output)
                     st.markdown(output)
                 except Exception as e:
                     msg = str(e)
-                    if "rate_limit" in msg.lower() or "resource_exhausted" in msg.lower() or "quota" in msg.lower() or "429" in msg:
+                    if "rate_limit" in msg.lower() or "429" in msg:
                         output = None
                         st.error(
-                            "Hit the API rate limit for this model. Wait a bit and try again, "
-                            "or check your Google AI Studio quota."
+                            "Hit Groq's rate limit for this model. Wait a bit and try again, "
+                            "or switch to a lighter model / upgrade to Groq's Developer tier for higher limits."
                         )
                     else:
                         output = None
