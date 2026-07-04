@@ -69,17 +69,17 @@ def build_prompt():
 
 
 def render_sidebar():
-    theme = st.sidebar.selectbox("🎨 Select Theme", list(THEME_COLORS.keys()))
+    theme = st.sidebar.selectbox(" Select Theme", list(THEME_COLORS.keys()))
 
     with st.sidebar:
         st.markdown("""
             **Finsight** is an edge-native, Agentic RAG quantitative terminal designed to autonomously analyze complex SEC filings and live market conditions.
 
             **System Architecture:**
-            * 🧠 **AI Engine:** Powered by GPT-OSS 120B via Groq's LPU inference for near-instant responses.
-            * 🔍 **Hybrid Vector Search:** Combines **ChromaDB** (semantic meaning) and **BM25** (exact keyword matching) to flawlessly extract dense financial tables without hallucinations.
-            * 🔀 **Isolated Routing:** Filters a shared vector store by company metadata for every uploaded PDF, keeping each report's data cleanly separated without duplicating infrastructure.
-            * 📈 **Live Synthesis:** Cross-references historical 10-K data with real-time stock metrics (Financial Modeling Prep) and breaking market news (DuckDuckGo).
+            *  **AI Engine:** Powered by GPT-OSS 120B via Groq's LPU inference for near-instant responses.
+            *  **Hybrid Vector Search:** Combines **ChromaDB** (semantic meaning) and **BM25** (exact keyword matching) to flawlessly extract dense financial tables without hallucinations.
+            *  **Isolated Routing:** Filters a shared vector store by company metadata for every uploaded PDF, keeping each report's data cleanly separated without duplicating infrastructure.
+            *  **Live Synthesis:** Cross-references historical 10-K data with real-time stock metrics (Financial Modeling Prep) and breaking market news (DuckDuckGo).
             """)
 
     bg_color, text_color = THEME_COLORS[theme]
