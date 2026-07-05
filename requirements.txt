@@ -20,6 +20,9 @@ langchain-chroma
 chromadb
 rank_bm25
 
+# Excel Export
+openpyxl
+
 # PDF Processing (Unstructured)
 unstructured[pdf]
 pdf2image
