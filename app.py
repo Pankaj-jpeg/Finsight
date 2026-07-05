@@ -50,10 +50,14 @@ if uploaded_files:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
 
-    agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
-    agent_executor = AgentExecutor(
-        agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, max_iterations=6
-    )
+    @st.cache_resource(show_spinner=False)
+    def get_agent_executor(_llm, _tools, _prompt):
+        agent = create_tool_calling_agent(llm=_llm, tools=_tools, prompt=_prompt)
+        return AgentExecutor(
+            agent=agent, tools=_tools, verbose=True, handle_parsing_errors=True, max_iterations=6
+        )
+
+    agent_executor = get_agent_executor(llm, tools, prompt)
 
     if user_input:
         with st.chat_message("user"):
