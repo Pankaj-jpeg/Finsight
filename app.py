@@ -5,8 +5,9 @@ from langchain_core.messages import HumanMessage, AIMessage
 from config import get_llm, build_prompt, render_sidebar
 from ingestion import create_retrievers
 from tools import ticker_search, get_stock_metrics, get_market_searcher
+from export import extract_financial_summary, build_excel_bytes
 
-st.set_page_config(page_title="Finsight")
+st.set_page_config(page_title="Finsight", page_icon="📊")
 render_sidebar()
 
 st.title("Finsight")
@@ -27,8 +28,26 @@ for msg in st.session_state.chat_history:
 user_input = st.chat_input("Ask a question about the financial report:")
 
 if uploaded_files:
-    report_tools = create_retrievers(llm, uploaded_files)
+    report_tools, vectorstore, company_meta = create_retrievers(llm, uploaded_files)
     tools = report_tools + [get_market_searcher(), ticker_search, get_stock_metrics]
+
+    if vectorstore is not None:
+        if st.button("📊 Export Financials to Excel"):
+            with st.spinner("Extracting figures from each report..."):
+                summaries = []
+                for company_name, _, filename in company_meta:
+                    summary = extract_financial_summary(llm, vectorstore, company_name)
+                    summary["company"] = company_name
+                    summary["source_report"] = filename
+                    summaries.append(summary)
+                excel_bytes = build_excel_bytes(summaries)
+
+            st.download_button(
+                "Download financial_summary.xlsx",
+                data=excel_bytes,
+                file_name="financial_summary.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
 
     agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(
