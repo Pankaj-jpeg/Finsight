@@ -28,7 +28,8 @@ for msg in st.session_state.chat_history:
 user_input = st.chat_input("Ask a question about the financial report:")
 
 if uploaded_files:
-    report_tools, vectorstore, company_meta = create_retrievers(llm, uploaded_files)
+    with st.spinner("Reading and indexing uploaded reports..."):
+        report_tools, vectorstore, company_meta = create_retrievers(llm, uploaded_files)
     tools = report_tools + [get_market_searcher(), ticker_search, get_stock_metrics]
 
     if vectorstore is not None:
