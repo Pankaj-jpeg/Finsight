@@ -69,7 +69,7 @@ def make_retriever_tool(vectorstore, bm25_retriever, company_name: str, safe_nam
 
 
 @st.cache_resource(show_spinner=False)
-def create_retrievers(_llm, uploaded_files) -> list[Tool]:
+def create_retrievers(_llm, uploaded_files):
     # _llm has a leading underscore so Streamlit doesn't try to hash it for the cache key
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)  # one model instance, shared by every file
@@ -101,10 +101,10 @@ def create_retrievers(_llm, uploaded_files) -> list[Tool]:
 
         all_documents.extend(documents)
         per_company_documents.setdefault(company_name, []).extend(documents)
-        company_meta.append((company_name, safe_name))
+        company_meta.append((company_name, safe_name, uploaded.name))
 
     if not all_documents:
-        return []
+        return [], None, []
 
     # One shared vectorstore for every uploaded report. Per-company isolation happens
     # via the "company" metadata filter at query time, not via separate Chroma collections
@@ -112,9 +112,9 @@ def create_retrievers(_llm, uploaded_files) -> list[Tool]:
     vectorstore = Chroma.from_documents(all_documents, embedding=embeddings)
 
     tools = []
-    for company_name, safe_name in company_meta:
+    for company_name, safe_name, _ in company_meta:
         bm25_retriever = BM25Retriever.from_documents(per_company_documents[company_name])
         bm25_retriever.k = RETRIEVER_K
         tools.append(make_retriever_tool(vectorstore, bm25_retriever, company_name, safe_name))
 
-    return tools
+    return tools, vectorstore, company_meta
